@@ -1,5 +1,7 @@
 import os
 import re
+from datetime import datetime
+from datetime import time
 
 import numpy as np
 import pandas as pd
@@ -94,3 +96,11 @@ def get_trades_pivot(trades: pd.DataFrame, base: str, event: str, value: str):
     # trades_pivot.with_columns(pl.all().exclude('time').diff())
 
     return trades_pivot
+
+
+# Function to convert a date string to the desired format
+def transform_date(input_date_str, reference_time):
+    input_date = datetime.strptime(input_date_str, '%Y-%m-%d')
+    result_datetime = datetime.combine(input_date.date(), reference_time)
+    result_str = result_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f')
+    return result_str

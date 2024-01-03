@@ -1,6 +1,7 @@
 import pandas as pd
 
-ftx_binance_spot_btc_orderbooks_df = pd.read_csv('FTX_data/binance_BTCUSDT_2022-11_trades.csv')
+# Get first glimpse into the data
+ftx_binance_spot_btc_orderbooks_df = pd.read_csv('FTX_data/ftx_BTC-PERP_2022-11_quotes.csv')
 print(ftx_binance_spot_btc_orderbooks_df.shape)
 print(ftx_binance_spot_btc_orderbooks_df.head())
 print(ftx_binance_spot_btc_orderbooks_df.columns)
@@ -11,6 +12,7 @@ print(ftx_binance_spot_btc_orderbooks_isna.head())
 print(ftx_binance_spot_btc_orderbooks_isna.describe())
 print(ftx_binance_spot_btc_orderbooks_df.duplicated())
 
+# Check for NaNs
 def print_nan_count(series: pd.Series):
     nan_sum = series.isna().sum()
     print(f"Identified {nan_sum} duplicate values "

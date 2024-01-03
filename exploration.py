@@ -6,6 +6,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from utils import load_data, crosscorr, get_trades_pivot
 
+# Call the defined functions with the desired parameters to perform a customized explorative analysis
+
+
+# Enter the Event for which the data should be prepared (FTX, FOMC_22, FOMC_23)
 event = 'FTX'
 excel_report = f'{event}_exploration_results.xlsx'
 
@@ -19,8 +23,6 @@ trades['time'] = pd.to_datetime(trades['time'])     # to feature engineering
 orderbooks['time'] = pd.to_datetime(orderbooks['time'])
 quotes['time'] = pd.to_datetime(quotes['time'])
 
-# Multiple rows with same time but different values in orderbooks for bitstamp
-
 trades['base'] = trades['symbol'].str.slice(0, 3)
 
 # Get unique values of base currencies
@@ -29,6 +31,7 @@ base_currencies = trades['base'].unique().tolist()
 markets = trades['market'].unique().tolist()
 
 exchanges = trades['exchange'].unique().tolist()
+
 
 # target feature developments per currency and exchange
 
@@ -72,6 +75,7 @@ def get_trade_volume_per_market(trades: pd.DataFrame):
 
 
 get_trade_volume_per_market(trades)
+
 
 # Market relationships regarding average price change
 
@@ -139,6 +143,7 @@ def get_feature_pct_change_market_comparison(orderbooks: pd.DataFrame, feature: 
 
 get_feature_pct_change_market_comparison(orderbooks, 'average_price')
 
+
 # Create trades pivot tables
 
 
@@ -147,7 +152,7 @@ def get_trades_pivot_table(base_currencies: list, trades: pd.DataFrame, pivot_va
 
         trades_pivot = get_trades_pivot(trades, base, event, pivot_value)
 
-        if not markets:
+        if markets is None:
             markets = trades_pivot.columns
 
         comp_stats = pd.DataFrame(columns=['market_comparison', 'statistic', 'value'])
@@ -155,6 +160,8 @@ def get_trades_pivot_table(base_currencies: list, trades: pd.DataFrame, pivot_va
         for i in range(len(markets)):
             for j in range(len(markets)):
                 if i == j:
+                    continue
+                if markets[i] in ['binance-futures/BTCUSDT', 'binance/BTCUSDT'] or markets[j] in ['binance-futures/BTCUSDT', 'binance/BTCUSDT'] :
                     continue
                 comparison = f'{markets[i]} - {markets[j]}'
                 diff_description = (trades_pivot[markets[i]] - trades_pivot[markets[j]]).describe()
@@ -178,10 +185,10 @@ def get_trades_pivot_table(base_currencies: list, trades: pd.DataFrame, pivot_va
         comp_stats.to_csv(f'{event}_exploration_results/{pivot_value}_market_comparison_{base}.csv')
 
 
-get_trades_pivot_table(base_currencies, trades, 'vwap')
+#get_trades_pivot_table(base_currencies, trades, 'vwap')
+
 
 # Calculate cross correlations
-
 
 def get_cross_correlations(base_currencies: list, trades: pd.DataFrame, pivot_value: str, markets=None):
 
@@ -189,7 +196,7 @@ def get_cross_correlations(base_currencies: list, trades: pd.DataFrame, pivot_va
 
         trades_pivot = get_trades_pivot(trades, base, event, pivot_value)
 
-        if not markets:
+        if markets is None:
             markets = trades_pivot.columns
 
         corrs = pd.DataFrame(columns=['market_comparison', 'Shift', 'Correlation'])
@@ -220,13 +227,13 @@ def get_cross_correlations(base_currencies: list, trades: pd.DataFrame, pivot_va
         corrs.to_csv(f'{event}_exploration_results/Cross_Correlations_{base}.csv')
 
 
-get_cross_correlations(base_currencies, trades, 'vwap')
+#get_cross_correlations(base_currencies, trades, 'vwap')
 
 # Measure liquidity
 
 def get_amihuds(trades: pd.DataFrame, markets=None):
 
-    if not markets:
+    if markets is None:
         markets = trades['market'].unique().tolist()
 
     amihuds = {}
@@ -277,7 +284,7 @@ get_amihuds(trades)
 def get_correlation_heatmap(data: str, numeric_columns=None):
 
     if data == 'trades':
-        if not numeric_columns:
+        if numeric_columns is None:
             numeric_columns = trades.select_dtypes(include=['number']).columns
 
             # Filter out datetime columns
@@ -296,7 +303,7 @@ def get_correlation_heatmap(data: str, numeric_columns=None):
         plt.show()
 
     if data == 'orderbooks':
-        if not numeric_columns:
+        if numeric_columns is None:
             numeric_columns = trades.select_dtypes(include=['number']).columns
 
             # Filter out datetime columns
@@ -315,7 +322,7 @@ def get_correlation_heatmap(data: str, numeric_columns=None):
         plt.show()
 
     if data == 'quotes':
-        if not numeric_columns:
+        if numeric_columns is None:
             numeric_columns = trades.select_dtypes(include=['number']).columns
 
             # Filter out datetime columns

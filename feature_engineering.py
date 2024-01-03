@@ -2,14 +2,17 @@ import os
 import pandas as pd
 from utils import load_data, separate_data, combine_data_by_category
 
+# Enter the Event for which the data should be prepared (FTX, FOMC_22, FOMC_23)
 event = 'FTX'
 
 data_folder = f'{event}_data_cleaned'
 
 data, filenames = load_data(data_folder)
 
+# Split the data files for trades, order books and quotes
 trade_data_distinct, ob_data_distinct, quote_data_distinct = separate_data(data, filenames, True if event == 'FTX' else False)
 
+# Combines the files of each category into one file with column for the respective market
 trade_data = combine_data_by_category(trade_data_distinct)
 ob_data = combine_data_by_category(ob_data_distinct)
 quote_data = combine_data_by_category(quote_data_distinct)
@@ -31,6 +34,7 @@ def create_order_book_features(order_book_data):
 
     return order_book_data
 
+
 # Feature Engineering for Trade Data
 def create_trade_features(trade_data):
     # Calculate the price difference between trades
@@ -44,40 +48,40 @@ def create_trade_features(trade_data):
 
     trade_data['vwap'] = trade_data['volume'] / trade_data['amount']
 
-    # Calculate Amihud ratio
+    # Calculate the Amihud ratio
     #trade_data['amihud'] = abs(trade_data['price_diff']) / trade_data['volume']
     trade_data['amihud'] = abs(trade_data['vwap'].pct_change()) / trade_data['volume']
 
     return trade_data
 
+
 # Feature Engineering for Quotes Data
 def create_quote_features(quote_data):
-    # Check if required columns are present, if not, insert null values
-    required_columns = ['amount', 'amount_buy', 'exchange', 'number_trades', 'number_trades_buy',
-                        'symbol', 'time', 'volume', 'volume_buy', 'amount_ask_10', 'amount_ask_25',
-                        'amount_bid_10', 'amount_bid_25', 'ask_amount', 'ask_price', 'bid_amount',
-                        'bid_price', 'timestamp', 'top_ask', 'top_bid']
+    # Check if required columns are present
+    # required_columns = ['amount', 'amount_buy', 'exchange', 'number_trades', 'number_trades_buy',
+    #                     'symbol', 'time', 'volume', 'volume_buy', 'amount_ask_10', 'amount_ask_25',
+    #                     'amount_bid_10', 'amount_bid_25', 'ask_amount', 'ask_price', 'bid_amount',
+    #                     'bid_price', 'timestamp', 'top_ask', 'top_bid']
+    #
+    # missing_columns = set(required_columns) - set(quote_data.columns)
+    #
+    # for column in missing_columns:
+    #     quote_data[column] = None
 
-    missing_columns = set(required_columns) - set(quote_data.columns)
-
-    for column in missing_columns:
-        quote_data[column] = None
-
-    # Calculate bid-ask spread
-    quote_data['average_trade_amount'] = quote_data['amount'] / quote_data['number_trades']
+    #quote_data['average_trade_amount'] = quote_data['amount'] / quote_data['number_trades']
     quote_data['ask_bid_ratio'] = quote_data['ask_amount'] / quote_data['bid_amount']
-    quote_data['trade_volume_ratio'] = quote_data['volume'] / quote_data['volume_buy']
-    quote_data['ask_price_ratio'] = quote_data['ask_price'] / quote_data['top_ask']
-    quote_data['bid_price_ratio'] = quote_data['bid_price'] / quote_data['top_bid']
+    #quote_data['trade_volume_ratio'] = quote_data['volume'] / quote_data['volume_buy']
+    #quote_data['ask_price_ratio'] = quote_data['ask_price'] / quote_data['top_ask']
+    #quote_data['bid_price_ratio'] = quote_data['bid_price'] / quote_data['top_bid']
 
     # Calculate bid-ask price ratio
-    quote_data['bid_ask_price_ratio'] = quote_data['top_bid'] / quote_data['top_ask']
+    #quote_data['bid_ask_price_ratio'] = quote_data['top_bid'] / quote_data['top_ask']
 
     # Calculate the percentage change in bid-ask prices
-    quote_data['price_change_percentage'] = quote_data['top_ask'].pct_change() * 100
+    #quote_data['price_change_percentage'] = quote_data['top_ask'].pct_change() * 100
 
     # Calculate the percentage change in bid-ask volumes
-    quote_data['volume_change_percentage'] = quote_data['volume'].pct_change() * 100
+    #quote_data['volume_change_percentage'] = quote_data['volume'].pct_change() * 100
 
     return quote_data
 

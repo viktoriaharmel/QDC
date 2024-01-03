@@ -1,9 +1,10 @@
 import os
 from utils import load_data
 
-# Maybe remove timestamp of na columns from all files of the corresponding event?
+# Drop duplicates and NaNs
 
-event = 'FOMC_23'
+# Enter the Event for which the data should be prepared (FTX, FOMC_22, FOMC_23)
+event = 'FTX'
 
 data_folder = f'{event}_data'
 
